@@ -29,12 +29,18 @@ plot_histogram(counts)
 
 
 ## CLI usage
-Examples:
+Execution examples:
 ```
 qmio-run circuit.qasm
+qmio-run --backend simulator_rtcs circuit.qasm
 qmio-run --shots 200 circuit.qasm
 qmio-run instructions.p
 ```
-
 By default the results of the execution are stored in: `results.json`
+
+Compilation examples:
+```
+qmio-compile -o circuit.p circuit.qasm
+qmio-compile --backend simulator_rtcs --shots 200 --output circuit.p circuit.qasm
+```
 
