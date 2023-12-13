@@ -17,4 +17,8 @@ fi
 # We have to modify the HOME of the user because it is not available in the lx7 control node
 export HOME=/mnt/Q_SWAP/$USER
 
+# If run from jupyter we must unset this options set by jupyter
+unset MPLBACKEND
+
+# Run the circuit
 python3.8 /mnt/Q_SWAP/qmio/backends/qpu_felisa/run.py $*

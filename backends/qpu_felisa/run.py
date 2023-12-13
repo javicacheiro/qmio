@@ -3,6 +3,8 @@ from qat.purr.compiler.frontends import QASMFrontend
 import pickle
 import sys
 import json
+from pathlib import Path
+from lx7.zmq_wrapper import ZMQClient
 
 
 if len(sys.argv) != 5:
@@ -14,23 +16,18 @@ results_filename = sys.argv[2]
 execution_metrics_filename = sys.argv[3]
 num_shots = int(sys.argv[4])
 
-# Read pre-compiled circuit
-with open(circuit_filename, "rb") as f:
-    print(f"Reading pre-compiled circuit file: {circuit_filename}")
-    instruction_builder = pickle.load(f)
-
-frontend = QASMFrontend()
+if Path(circuit_filename).is_file():
+    print(f"Reading circuit file: {circuit_filename}")
+    circuit = Path(circuit_filename).read_text()
 
 config = CompilerConfig()
 config.results_format.binary_count()
 config.repeats = num_shots
 
-results, execution_metrics = frontend.execute(instruction_builder, compiler_config=config)
+zmq_client = ZMQClient()
+results = zmq_client.execute_task(circuit, config.to_json())
 
 with open(results_filename, "w") as f:
     json.dump(results, f)
-
-with open(execution_metrics_filename, "w") as f:
-    json.dump(execution_metrics.as_dict(), f)
 
 print(results)

@@ -48,7 +48,10 @@ if __name__ == "__main__":
         default="execution_metrics.json",
         help="Execution metrics file"
     )
+    parser.add_argument("-d", "--direct", action='store_true',
+                        help="Run directly without pre-compilation")
     args = parser.parse_args()
 
     qmio.run(args.qasm_file, backend=args.backend, results=args.results,
-             execution_metrics=args.metrics, shots=args.shots)
+             execution_metrics=args.metrics, shots=args.shots,
+             direct=args.direct)
