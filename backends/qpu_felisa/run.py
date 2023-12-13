@@ -25,9 +25,12 @@ config.results_format.binary_count()
 config.repeats = num_shots
 
 zmq_client = ZMQClient()
-results = zmq_client.execute_task(circuit, config.to_json())
+output = zmq_client.execute_task(circuit, config.to_json())
 
 with open(results_filename, "w") as f:
-    json.dump(results, f)
+    json.dump(output["results"], f)
 
-print(results)
+with open(execution_metrics_filename, "w") as f:
+    json.dump(output["execution_metrics"], f)
+
+print(output["results"])
