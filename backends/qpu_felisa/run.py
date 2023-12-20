@@ -1,6 +1,4 @@
-from qat.purr.compiler.config import CompilerConfig
-from qat.purr.compiler.frontends import QASMFrontend
-import pickle
+from qat.purr.compiler.config import CompilerConfig, QiskitOptimizations, TketOptimizations
 import sys
 import json
 from pathlib import Path
@@ -23,6 +21,8 @@ if Path(circuit_filename).is_file():
 config = CompilerConfig()
 config.results_format.binary_count()
 config.repeats = num_shots
+#config.optimizations = QiskitOptimizations.Empty
+config.optimizations = TketOptimizations.Empty
 
 zmq_client = ZMQClient()
 output = zmq_client.execute_task(circuit, config.to_json())
