@@ -24,7 +24,7 @@ def run(circuit, shots=100, backend='simulator_rtcs',
 
     :return: Python dictionary containing the results of the execution
     """
-    if circuit.startswith('OPENQASM 2.0'):
+    if circuit.startswith('OPENQASM'):
         return run_qasm_str(circuit, shots=shots,
                             backend=backend, results=results,
                             execution_metrics=execution_metrics, direct=direct)
