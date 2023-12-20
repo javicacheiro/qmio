@@ -111,10 +111,13 @@ def run_instructions(instructions, results='results.json',
         raise RunCommandError('The slurm job failed')
     print(f"Finished running, results in: {results}")
     print(f"Finished running, execution metrics in: {execution_metrics}")
-    out = None
+    r = None
     with open(results) as f:
-        out = json.load(f)
-    return out
+        r = json.load(f)
+    m = None
+    with open(execution_metrics) as f:
+        m = json.load(f)
+    return r, m
 
 
 def compile(qasm_filename, output_filename='instructions.p', shots=100,
