@@ -24,10 +24,8 @@ qc.measure_all()
 
 try:
     results, metrics = qmio.run(qc.qasm(), backend='qpu_felisa', direct=True, shots=1000)
-    counts = results['meas']
-    plot_histogram(counts)
-except RunCommandError:
-    print("The slurm job has failed")
+except RunCommandError as e:
+    print(e)
 ```
 
 

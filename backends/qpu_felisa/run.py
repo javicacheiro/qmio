@@ -27,10 +27,15 @@ config.optimizations = TketOptimizations.Empty
 zmq_client = ZMQClient()
 output = zmq_client.execute_task(circuit, config.to_json())
 
-with open(results_filename, "w") as f:
-    json.dump(output["results"], f)
+if "results" in output:
+    with open(results_filename, "w") as f:
+        json.dump(output["results"], f)
 
-with open(execution_metrics_filename, "w") as f:
-    json.dump(output["execution_metrics"], f)
+    with open(execution_metrics_filename, "w") as f:
+        json.dump(output["execution_metrics"], f)
 
-print(output["results"])
+    print(output["results"])
+else:
+    with open("error.json", "w") as f:
+        json.dump(output, f)
+    sys.exit(1)

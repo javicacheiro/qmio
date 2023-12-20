@@ -108,7 +108,9 @@ def run_instructions(instructions, results='results.json',
     #print("DEBUG: ", cmd)
     p = subprocess.run(cmd, shell=True)
     if p.returncode != 0:
-        raise RunCommandError('The slurm job failed')
+        with open("error.json") as f:
+            e = json.load(f)
+        raise RunCommandError(f"The slurm job failed: {e['Exception']}")
     print(f"Finished running, results in: {results}")
     print(f"Finished running, execution metrics in: {execution_metrics}")
     r = None
