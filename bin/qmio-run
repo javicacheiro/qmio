@@ -7,9 +7,8 @@ r"""
         \__\_\|_|  |_||___| \___/  /_/
 
 qmio-run allows to execute QASM circuits in different backends:
-    - felisa_qpu
-    - rtcs_simulator
-    - qulacs_simulator
+    - qpu_felisa
+    - simulator_rtcs
 
 It takes care of submitting the jobs to slurm and retrieving the results.
 
