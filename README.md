@@ -8,23 +8,26 @@ export PYTHONPATH=/mnt/Q_SWAP/qmio/lib
 export PATH=/mnt/Q_SWAP/qmio/bin/:$PATH
 ```
 
-## Python Moudule Usage
+## Python Module Usage
 Basic usage:
 ```
 from qiskit import QuantumCircuit
 from qiskit.visualization import plot_histogram
 import qmio
+from qmio.utils import RunCommandError
+
 
 qc = QuantumCircuit(2)
 qc.h(0)
 qc.cx(0, 1)
 qc.measure_all()
 
-results = qmio.run(qc.qasm(), backend='simulator_rtcs')
-
-counts = results['meas']
-
-plot_histogram(counts)
+try:
+    results, metrics = qmio.run(qc.qasm(), backend='qpu_felisa', direct=True, shots=1000)
+    counts = results['meas']
+    plot_histogram(counts)
+except RunCommandError:
+    print("The slurm job has failed")
 ```
 
 
@@ -32,9 +35,9 @@ plot_histogram(counts)
 Execution examples:
 ```
 qmio-run circuit.qasm
-qmio-run --backend simulator_rtcs circuit.qasm
-qmio-run --shots 200 circuit.qasm
 qmio-run instructions.p
+qmio-run --direct --backend qpu_felisa --shots 200 circuit.qasm
+qmio-run --backend simulator_rtcs circuit.qasm
 ```
 By default the results of the execution are stored in: `results.json`
 
