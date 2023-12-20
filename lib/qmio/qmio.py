@@ -110,7 +110,7 @@ def run_instructions(instructions, results='results.json',
     if p.returncode != 0:
         with open("error.json") as f:
             e = json.load(f)
-        raise RunCommandError(f"The slurm job failed: {e['Exception']}")
+        raise RunCommandError(f"The slurm job failed: {e}")
     print(f"Finished running, results in: {results}")
     print(f"Finished running, execution metrics in: {execution_metrics}")
     r = None
