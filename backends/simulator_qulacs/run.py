@@ -1,19 +1,39 @@
 from qulacs import QuantumCircuit, QuantumState, QuantumCircuitSimulator, Observable
 from qulacs import converter
+import sys
+import json
+from pathlib import Path
+import time
 
-# Hay que quitar los creg y las medidas porque no está soportado por la autotraducción
-qasm_string = """
-OPENQASM 2.0;
-include "qelib1.inc";
 
-qreg q[2];
+if len(sys.argv) != 5:
+    print("Usage: python3.8 run.py <compiled_circuit.x> <results.json> <execution_metrics.json> <num_shots>")
+    sys.exit(1)
 
-h q[0];           
-cx q[0],q[1];     
-"""
+circuit_filename = sys.argv[1]
+results_filename = sys.argv[2]
+execution_metrics_filename = sys.argv[3]
+num_shots = int(sys.argv[4])
+
+if Path(circuit_filename).is_file():
+    print(f"Reading circuit file: {circuit_filename}")
+    circuit = Path(circuit_filename).read_text()
+
+## Hay que quitar los creg y las medidas porque no está soportado por la autotraducción
+#qasm_string = """
+#OPENQASM 2.0;
+#include "qelib1.inc";
+#
+#qreg q[2];
+#
+#h q[0];
+#cx q[0],q[1];
+#"""
 # Convertir el qasm a un circuito en qulacs
-qc = converter.convert_QASM_to_qulacs_circuit(qasm_string.splitlines())
-print(qc)
+qc = converter.convert_QASM_to_qulacs_circuit(circuit.splitlines())
+
+if DEBUG == 1:
+    print("El circuito en QASM:", qc)
 
 # Instanciar el vector de estado
 qubits = qc.get_qubit_count()
@@ -35,22 +55,24 @@ con qulacs y sacarle rendimiento es mejor hacerlo directo.
 
 # Inicializar el vector de estado en el estado 0
 state.set_zero_state()
-print(state)
+if DEBUG == 1:
+    print("Estado inicializado en cero:", state)
 
 # Inicializar el simulador y simular
 sim = QuantumCircuitSimulator(qc, state)
 sim.simulate()
-print(state)
+if DEBUG == 1:
+    print("Estado tras la aplicación del algoritmo:", state)
 
 ########################################################################
 ########################################################################
 
 # Instanciar un observable y obtener el valor esperado de ese observable
-observable = Observable(1)
-observable.add_operator(1.0, "Z 0")
-
-expectation_value = sim.get_expectation_value(observable)
-print("Valor esperado del observable:", expectation_value)
+#observable = Observable(1)
+#observable.add_operator(1.0, "Z 0")
+#
+#expectation_value = sim.get_expectation_value(observable)
+#print("Valor esperado del observable:", expectation_value)
 
 ########################################################################
 ########################################################################
@@ -72,21 +94,19 @@ def build_ising_hamiltonian(qubits, h_values, J_values):
 
     return hamiltonian
 
-h_values = [0.5, -0.3]
-j_values = [0.4]
+#h_values = [0.5, -0.3]
+#j_values = [0.4]
 
-ising_hamiltonian = build_ising_hamiltonian(qbits, h_values, j_values)
-print("Hamiltoniano de Ising:")
-print(ising_hamiltonian)
+#ising_hamiltonian = build_ising_hamiltonian(qbits, h_values, j_values)
+#print("Hamiltoniano de Ising:")
+#print(ising_hamiltonian)
 
 # Obtener el valor esperado de la energía mínima
-energy_min = sim.get_expectation_value(ising_hamiltonian)
+#energy_min = sim.get_expectation_value(ising_hamiltonian)
 
 ########################################################################
 ########################################################################
 
 # Número de shots y cuentas. Resultado tipo qasm en qmio
-num_shots = 1000
-
 measurement_counts = sim.run_measurement_counts(num_shots)
 print("Número de cuentas tras", num_shots, "shots:", measurement_counts)
