@@ -3,7 +3,7 @@ from qat.purr.compiler.frontends import QASMFrontend
 import pickle
 import sys
 import json
-
+import time
 
 if len(sys.argv) != 5:
     print("Usage: python3.8 run.py <compiled_circuit.x> <results.json> <execution_metrics.json> <num_shots>")
@@ -25,7 +25,11 @@ config = CompilerConfig()
 config.results_format.binary_count()
 config.repeats = num_shots
 
+# Time measure
+start = time.time()
+end = time.time()
 results, execution_metrics = frontend.execute(instruction_builder, compiler_config=config)
+elapsed = {"elapsed_time": end - time}
 
 with open(results_filename, "w") as f:
     json.dump(results, f)

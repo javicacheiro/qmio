@@ -3,7 +3,7 @@ import sys
 import json
 from pathlib import Path
 from lx7.zmq_wrapper import ZMQClient
-
+import time
 
 if len(sys.argv) != 5:
     print("Usage: python3.8 run.py <compiled_circuit.x> <results.json> <execution_metrics.json> <num_shots>")
@@ -25,7 +25,12 @@ config.repeats = num_shots
 config.optimizations = TketOptimizations.Empty
 
 zmq_client = ZMQClient()
+# Time measure in the execution
+# Compilation in CS + Execution to QPU + Comming back results from QPU
+start = time.time()
 output = zmq_client.execute_task(circuit, config.to_json())
+end = time.time()
+elapsed = {"elapsed_time": end - time}
 
 if "results" in output:
     with open(results_filename, "w") as f:
@@ -33,6 +38,7 @@ if "results" in output:
 
     with open(execution_metrics_filename, "w") as f:
         json.dump(output["execution_metrics"], f)
+        json.dump(elapsed, f)
 
     print(output["results"])
 else:
