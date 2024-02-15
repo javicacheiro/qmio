@@ -5,6 +5,14 @@ import json
 from pathlib import Path
 import time
 
+import numpy as np
+from mpi4py import MPI
+
+mpicomm = MPI.COMM_WORLD
+mpirank = mpicomm.Get_rank()
+mpisize = mpicomm.Get_size()
+globalqubits = int(np.log2(mpisize))
+
 DEBUG=0
 
 if len(sys.argv) != 5:
@@ -38,7 +46,7 @@ if DEBUG == 1:
 
 # Instanciar el vector de estado
 qubits = qc.get_qubit_count()
-state = QuantumState(qubits)    # si fuese en la implementación paralela, QuantumState(qubits, 1) y ademas inicializar el entorno mpi
+state = QuantumState(qubits, use_multi_cpu = True)    # si fuese en la implementación paralela, QuantumState(qubits, 1) y ademas inicializar el entorno mpi
 
 """
 Tendríamos que definir cual es la función báscia
@@ -60,6 +68,8 @@ if DEBUG == 1:
     print("Estado inicializado en cero:", state)
 
 # Inicializar el simulador y simular
+#sim = QuantumCircuitSimulator(qc, state)
+#sim.simulate()
 qc.update_quantum_state(state)
 if DEBUG == 1:
     print("Estado tras la aplicación del algoritmo:", state)
@@ -121,7 +131,8 @@ def contar_ocurrencias(lista=binary_count):
             diccionario[elemento] = 1
     return diccionario
 
-result = contar_ocurrencias()
-print(result)
-dev_type = state.get_device_name()
-print("device", dev_type)
+if mpirank == 0:
+    result = contar_ocurrencias()
+    print(result)
+    dev_type = state.get_device_name()
+    print("device", dev_type)
