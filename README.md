@@ -30,18 +30,36 @@ except RunCommandError as e:
 
 
 ## CLI usage
-Execution examples:
+### Help
+You can see all available options running:
 ```
-qmio-run circuit.qasm
-qmio-run instructions.p
+qmio-run --help
+```
+Below you can see examples of how to execute and compile code.
+
+### Execution examples
+- Run a QASM circuit in the Felisa QPU
+```
 qmio-run --direct --backend qpu_felisa --shots 200 circuit.qasm
+```
+- Run in the simulator
+```
 qmio-run --backend simulator_rtcs circuit.qasm
 ```
-By default the results of the execution are stored in: `results.json`
+- Run in the default backend
+```
+qmio-run circuit.qasm
+```
+- Run a compiled instructions file in the default backend
+```
+qmio-run instructions.p
+```
 
-Compilation examples:
+By default the results of the execution are stored in `results.json` and the execution metrics in `execution_metrics.json` in the directory where you submitted the job.
+
+### Compilation examples
 ```
 qmio-compile -o circuit.p circuit.qasm
 qmio-compile --backend simulator_rtcs --shots 200 --output circuit.p circuit.qasm
 ```
-
+Currently compilation is not possible for Felisa QPU backend.
