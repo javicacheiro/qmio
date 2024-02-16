@@ -10,7 +10,7 @@ export PATH=/mnt/Q_SWAP/qmio/bin/:$PATH
 
 ## Python Module Usage
 Basic usage:
-```
+```python
 from qiskit import QuantumCircuit
 from qiskit.visualization import plot_histogram
 import qmio
