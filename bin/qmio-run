@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("qasm_file", help="QASM or instructions file path")
     parser.add_argument("-s", "--shots", default=100, help="Number of shots")
     parser.add_argument(
-        "-b", "--backend", default="simulator_rtcs",
+        "-b", "--backend", default="qpu_felisa",
         choices=["simulator_rtcs", "qpu_felisa",
                  "simulator_qulacs", "simulator_aer"],
         help="Backend to use"
@@ -47,9 +47,22 @@ if __name__ == "__main__":
         default="execution_metrics.json",
         help="Execution metrics file"
     )
-    parser.add_argument("-d", "--direct", action='store_true',
-                        help="Run directly without pre-compilation")
+    parser.add_argument(
+        "-d", "--direct",
+        action='store_true',
+        default=True,
+        help="Submit the circuit directly without any pre-compilation (default)"
+    )
+    parser.add_argument(
+        "-p", "--precompile",
+        action='store_true',
+        default=False,
+        help="Pre-compile the circuit before submitting"
+    )
     args = parser.parse_args()
+
+    if args.precompile:
+        args.direct = False
 
     qmio.run(args.qasm_file, backend=args.backend, results=args.results,
              execution_metrics=args.metrics, shots=args.shots,
