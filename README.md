@@ -23,7 +23,7 @@ qc.cx(0, 1)
 qc.measure_all()
 
 try:
-    results, metrics = qmio.run(qc.qasm(), backend='qpu_felisa', direct=True, shots=1000)
+    results, metrics = qmio.run(qc.qasm(), shots=1000)
 except RunCommandError as e:
     print(e)
 ```
@@ -40,19 +40,19 @@ Below you can see examples of how to execute and compile code.
 ### Execution examples
 - Run a QASM circuit in the Felisa QPU
 ```
-qmio-run --direct --backend qpu_felisa --shots 200 circuit.qasm
+qmio-run --shots 200 circuit.qasm
 ```
 - Run in the simulator
 ```
-qmio-run --backend simulator_rtcs circuit.qasm
+qmio-run --backend simulator_rtcs --precompile circuit.qasm
 ```
 - Run in the default backend
 ```
 qmio-run circuit.qasm
 ```
-- Run a compiled instructions file in the default backend
+- Run a compiled instructions file in the simulator_rtcs backend
 ```
-qmio-run instructions.p
+qmio-run --backend simulator_rtcs instructions.p
 ```
 
 By default the results of the execution are stored in `results.json` and the execution metrics in `execution_metrics.json` in the directory where you submitted the job.
