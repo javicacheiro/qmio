@@ -7,9 +7,9 @@ from qmio.utils import RunCommandError
 PREFIX = "/mnt/Q_SWAP"
 
 
-def run(circuit, shots=100, backend='simulator_rtcs',
+def run(circuit, shots=100, backend='qpu_felisa',
         results='results.json', execution_metrics='execution_metrics.json',
-        instructions='instructions.p', direct=False):
+        instructions='instructions.p', direct=True):
     """Run the given circuit
 
     :param circuit: circuit can be given in any of the following formats:
@@ -41,7 +41,7 @@ def run(circuit, shots=100, backend='simulator_rtcs',
 
 def run_qasm_str(qasm_str, results='results.json',
              execution_metrics='execution_metrics.json', shots=100,
-             backend='simulator_rtcs', direct=False):
+             backend='qpu_felisa', direct=False):
     """Run a circuit from a qasm string
 
     :param qasm_string: qasm string representing the circuit
@@ -62,7 +62,7 @@ def run_qasm_str(qasm_str, results='results.json',
 
 def run_qasm(qasm_filename, results='results.json',
              execution_metrics='execution_metrics.json', shots=100,
-             backend='simulator_rtcs', direct=False):
+             backend='qpu_felisa', direct=False):
     """Run a qasm circuit reading it from the given file
 
     :param qasm_filename: filename with the qasm circuit
@@ -88,7 +88,7 @@ def run_qasm(qasm_filename, results='results.json',
 
 def run_instructions(instructions, results='results.json',
                      execution_metrics='execution_metrics.json', shots=100,
-                     backend='simulator_rtcs'):
+                     backend='qpu_felisa'):
     """Run a compiled circuit reading it from the given file
 
     :param instructions: filename with the instructions of the compiled circuit
