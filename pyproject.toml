@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qmio"
+dynamic = ["version"]
+description = "Helper python module to interact with the different backends available in Qmio."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "Apache-2.0"
+keywords = ["Quantum", "Comunication-Client"]
+authors = [
+    { name = "Alvaro Caride", email = "a.caride.sanchez@gmail.com" },
+    { name = "Javier Cacheiro", email = "javier.cacheiro@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "pyzmq",
+]
+
+[project.urls]
+Homepage = "https://gitlab.lan.cesga.es/qmio/qmio-run"
+"Users Guide" = "https://cesga-docs.gitlab.io/qmio-user-guide/index.html"
+
+[tool.hatch.version]
+path = "src/qmio/__init__.py"
+
+[tool.hatch.build]
+include = [
+    "src/qmio/",
+    "src/config/",
+    "src/qmio/slurm_scripts/*.sh"
+]
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+
+[tool.hatch.envs.hatch-test]
+default-args = ["src/tests"]
+dependencies = [
+    "coverage",
+    "pytest",
+    "pytest-mock"
+]
+
+[tool.hatch.envs.py39]
+python="3.9"
+dependencies = [
+    "pyzmq==22.3",
+]
+
+[tool.hatch.envs.hatch-test.scripts]
+run = ["pytest {env:HATCH_TEST_ARGS:} {args}"]
+run-cov = [
+    "coverage run -m pytest {env:HATCH_TEST_ARGS} {args}",
+]
+cov-combine = "coverage combine"
+cov-report = [
+           "coverage report -m",
+           "coverage html"
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.11", "3.9"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/qmio}"
+
+[tool.ruff]
+select = ["E", "F", "W"]
+line-length = 88
+
+[tool.hatch.envs.docs]
+dependencies = [
+  "sphinx",
+]
+
+[tool.hatch.envs.docs.scripts]
+pre-build = [
+"sphinx-apidoc -o docs/source/ src/qmio",
+]
+
+build-docs = ["sphinx-build -b html docs/source/ docs/build"]
+
+full-build = [
+"sphinx-apidoc -o docs/source/ src/qmio",
+"sphinx-build -b html docs/source/ docs/build"
+]
