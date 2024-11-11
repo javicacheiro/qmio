@@ -1,4 +1,0 @@
-DEBUG = False
-
-QMIO_BASE_DIR = "/mnt/Q_SWAP"
-ZMQ_SERVER = "tcp://10.133.29.226:5556"
