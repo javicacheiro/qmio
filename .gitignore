@@ -7,7 +7,6 @@ venv
 *.log
 dist
 build
-docs/source
 docs/build
 .tox
 .coverage
