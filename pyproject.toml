@@ -28,7 +28,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/javicacheiro/qmio"
-"Users Guide" = "https://cesga-docs.gitlab.io/qmio-user-guide/index.html"
+"Users Guide" = "qmio.readthedocs.io"
 
 [tool.hatch.version]
 path = "src/qmio/__init__.py"
