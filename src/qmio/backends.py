@@ -236,7 +236,6 @@ class QPUBackend:
         self._slurmclient: Optional[SlurmClient] = None
         self._job_id = None
         self._verification_cmd: Optional[str] = None
-        # Verification of the tunnel time limit missing
         if time_within_time_limit(tunnel_time_limit):
             self._tunnel_time_limit = tunnel_time_limit or None
         self._logger = logging.getLogger(self.__class__.__name__)

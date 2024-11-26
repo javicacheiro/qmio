@@ -3,6 +3,7 @@ import os
 from unittest.mock import patch, call
 from qmio.clients import SlurmClient
 from qmio.utils import RunCommandError
+from config import TUNNEL_TIME_LIMIT
 
 
 class TestSlurmClient:
@@ -82,8 +83,9 @@ class TestSlurmClient:
 
         current_dir = os.path.dirname(os.path.dirname(__file__))
         expected_script_path = os.path.join(current_dir, "qmio", "slurm_scripts", "backend1.sh")
+        expected_time_limit = TUNNEL_TIME_LIMIT
         # Verificamos que se generaron los comandos correctos
-        mock_run.assert_called_with(f"sbatch {expected_script_path} 650")
+        mock_run.assert_called_with(f"sbatch --time={expected_time_limit} {expected_script_path} 650")
         mock_is_job_running.assert_called_with("12345")
         mock_check_backend_node.assert_called_with("backend1")
 
