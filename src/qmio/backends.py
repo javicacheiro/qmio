@@ -194,6 +194,10 @@ class QPUBackend:
             Job id returned from slurm.
         _verification_cmd : str, default = None
             Connection verification command.
+        _tunnel_time_limit: str, Optional
+            User provided time limit to stablish the tunnel job
+        reservation_name: str, Optional
+            User provided reservation name to stablish tunnel to. Just active if provided.
 
     PrivateMethods
     --------------
@@ -214,6 +218,7 @@ class QPUBackend:
         logging_level: Union[int, str] = logging.NOTSET,
         logging_filename: Optional[str] = None,
         tunnel_time_limit: Optional[str] = None,
+        reservation_name: Optional[str] = None,
     ):
 
         """
@@ -227,8 +232,10 @@ class QPUBackend:
             The level of logging to use. Defaults to 0.
         logging_filename : str or None, optional
             The filename for logging output. Defaults to None.
-        tunnel_time_limit: str or None, optiona
+        tunnel_time_limit: str or None, optional
             Time limit user specified for stablish interactive tunnels
+        reservation_name: str or None, optional
+            reservation name user specified
         """
         self._backend = "qpu"
         self._endpoint = address or ZMQ_SERVER
@@ -238,6 +245,8 @@ class QPUBackend:
         self._verification_cmd: Optional[str] = None
         if time_within_time_limit(tunnel_time_limit):
             self._tunnel_time_limit = tunnel_time_limit or None
+        if reservation_name:
+            self.reservation_name = reservation_name
         self._logger = logging.getLogger(self.__class__.__name__)
         self._logger.setLevel(logging_level)
         self._logger.info("QPUBackend created")
@@ -327,7 +336,8 @@ class QPUBackend:
             self._logger.debug("Starting the redirection process.")
 
             if not self._slurmclient:
-                self._slurmclient = SlurmClient()
+                self._slurmclient = SlurmClient(reservation_name=self.reservation_name) if self.reservation_name else SlurmClient()
+
             self._job_id, self._endpoint = self._slurmclient.submit_and_wait(
                 backend=self._backend,
                 time_limit=self._tunnel_time_limit

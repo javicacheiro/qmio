@@ -238,11 +238,17 @@ class SlurmClient(SlurmBaseClient):
     _is_job_running(job_id):
         Checks if the job with the specified job ID is currently running.
     """
-    def __init__(self, time_limit: Optional[str] = None):
+    def __init__(
+            self,
+            time_limit: Optional[str] = None,
+            reservation_name: Optional[str] = None,
+    ):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
         self._max_retries: int = 288000
         self._tunnel_time_limit: Optional[str] = TUNNEL_TIME_LIMIT or None
+        if reservation_name:
+            self.reservation_name = reservation_name
 
     def scancel(self, job_id: Optional[str] = None):
         """
@@ -371,7 +377,12 @@ class SlurmClient(SlurmBaseClient):
                 self._endpoint_port = random.randint(600, 699)
                 end_endpoint_get = time_ns()
                 self._logger.info(f"Endpoint port got in: {(end_endpoint_get - start)/1e9}")
-            self._submit_cmd = f"sbatch --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+
+            if self.reservation_name:
+                self._submit_cmd = f"sbatch --reservation='{reservation_name}' --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+            else:
+                self._submit_cmd = f"sbatch --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+
             stdout, stderr = run(self._submit_cmd)
 
             self._logger.debug(f"Submission command: {self._submit_cmd}")
