@@ -213,6 +213,7 @@ class QPUBackend:
         address: Optional[str] = None,
         logging_level: Union[int, str] = logging.NOTSET,
         logging_filename: Optional[str] = None,
+        tunnel_time_limit: Optional[str] = None,
     ):
 
         """
@@ -226,6 +227,8 @@ class QPUBackend:
             The level of logging to use. Defaults to 0.
         logging_filename : str or None, optional
             The filename for logging output. Defaults to None.
+        tunnel_time_limit: str or None, optiona
+            Time limit user specified for stablish interactive tunnels
         """
         self._backend = "qpu"
         self._endpoint = address or ZMQ_SERVER
@@ -233,6 +236,7 @@ class QPUBackend:
         self._slurmclient: Optional[SlurmClient] = None
         self._job_id = None
         self._verification_cmd: Optional[str] = None
+        self._tunnel_time_limit = tunnel_time_limit or None
         self._logger = logging.getLogger(self.__class__.__name__)
         self._logger.setLevel(logging_level)
         self._logger.info("QPUBackend created")
@@ -324,7 +328,8 @@ class QPUBackend:
             if not self._slurmclient:
                 self._slurmclient = SlurmClient()
             self._job_id, self._endpoint = self._slurmclient.submit_and_wait(
-                backend=self._backend
+                backend=self._backend,
+                time_limit=self._tunnel_time_limit
             )
             self._logger.debug(
                 f"Returns of submit and wait: job_id = {self._job_id}& endpoint = {self._endpoint}"
