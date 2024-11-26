@@ -203,7 +203,7 @@ class SlurmBaseClient(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def submit_and_wait(self, endpoint_port=None, backend=None): # pragma: no cover
+    def submit_and_wait(self, endpoint_port=None, backend=None, time_limit: Optional[str] = None) -> tuple[Optional[str], Optional[str]]: # pragma: no cover
         pass
 
 
@@ -238,13 +238,13 @@ class SlurmClient(SlurmBaseClient):
     _is_job_running(job_id):
         Checks if the job with the specified job ID is currently running.
     """
-    def __init__(self, time_limit: Optional[str]):
+    def __init__(self, time_limit: Optional[str] = None):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
         self._max_retries: int = 288000
-        self._tunnel_time_limit = time_limit or TUNNEL_TIME_LIMIT
+        self._tunnel_time_limit: Optional[str] = TUNNEL_TIME_LIMIT or None
 
-    def scancel(self, job_id: int = None):
+    def scancel(self, job_id: Optional[str] = None):
         """
         Cancel a job to deallocate the frontal node.
 
@@ -335,7 +335,7 @@ class SlurmClient(SlurmBaseClient):
         else:
             raise ValueError(f'No result came from: "{_check_node_cmd}" Does not fit a NodeName')
 
-    def submit_and_wait(self, endpoint_port=None, backend=None):
+    def submit_and_wait(self, endpoint_port=None, backend=None, time_limit: Optional[str] = None):
         """
         Submit the tunnel job to Slurm and wait for it to start.
 
@@ -348,6 +348,8 @@ class SlurmClient(SlurmBaseClient):
             The port for redirecting connections. If None, a random port between 600 and 699 is used.
         backend : str, optional
             The name of the backend partition where the job is submitted.
+        time_limit: str, optional
+            The time limit for the tunner job. If not explicitly set will use the class default -> module default.
 
         Returns
         -------
@@ -369,7 +371,7 @@ class SlurmClient(SlurmBaseClient):
                 self._endpoint_port = random.randint(600, 699)
                 end_endpoint_get = time_ns()
                 self._logger.info(f"Endpoint port got in: {(end_endpoint_get - start)/1e9}")
-            self._submit_cmd = f"sbatch --time={self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+            self._submit_cmd = f"sbatch --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
             stdout, stderr = run(self._submit_cmd)
 
             self._logger.debug(f"Submission command: {self._submit_cmd}")
