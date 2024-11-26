@@ -28,7 +28,9 @@ import re
 from time import sleep, time, time_ns
 
 import zmq
+from typing import Optional
 
+from config import TUNNEL_TIME_LIMIT
 from qmio.utils import RunCommandError, run
 
 logger = logging.getLogger(__name__)
@@ -236,10 +238,11 @@ class SlurmClient(SlurmBaseClient):
     _is_job_running(job_id):
         Checks if the job with the specified job ID is currently running.
     """
-    def __init__(self):
+    def __init__(self, time_limit: Optional[str]):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
         self._max_retries: int = 288000
+        self._tunnel_time_limit = time_limit or TUNNEL_TIME_LIMIT
 
     def scancel(self, job_id: int = None):
         """
@@ -366,7 +369,7 @@ class SlurmClient(SlurmBaseClient):
                 self._endpoint_port = random.randint(600, 699)
                 end_endpoint_get = time_ns()
                 self._logger.info(f"Endpoint port got in: {(end_endpoint_get - start)/1e9}")
-            self._submit_cmd = f"sbatch {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+            self._submit_cmd = f"sbatch --time={self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
             stdout, stderr = run(self._submit_cmd)
 
             self._logger.debug(f"Submission command: {self._submit_cmd}")
