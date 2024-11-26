@@ -92,6 +92,41 @@ class TestSlurmClient:
         with pytest.raises(ValueError):
             client.submit_and_wait(backend=None)
 
+    @patch("qmio.clients.run")
+    @patch("random.randint")
+    @patch("time.sleep")
+    @patch.object(SlurmClient, '_is_job_running')
+    @patch.object(SlurmClient, '_check_backend_node')
+    def test_submit_and_wait_reservation(self, mock_check_backend_node, mock_is_job_running, mock_sleep, mock_randint, mock_run):
+        # Instancia del cliente
+        reservation_name = "reserva_alvaro"
+        client = SlurmClient(reservation_name=reservation_name)
+
+        # Mock de valores que devuelve cada función
+        mock_randint.return_value = 650
+        mock_run.return_value = ("Submitted batch job 12345", "")
+        mock_is_job_running.side_effect = [False, False, True]  # Simula que el trabajo empieza después de algunos intentos
+        mock_check_backend_node.return_value = "10.120.1.10"
+
+        # Llamamos al método a probar
+        job_id, endpoint = client.submit_and_wait(backend="backend1")
+
+        # Verificamos los resultados
+        assert job_id == "12345"
+        assert endpoint == "tcp://10.120.1.10:650"
+
+        current_dir = os.path.dirname(os.path.dirname(__file__))
+        expected_script_path = os.path.join(current_dir, "qmio", "slurm_scripts", "backend1.sh")
+        expected_time_limit = TUNNEL_TIME_LIMIT
+        # Verificamos que se generaron los comandos correctos
+
+        mock_run.assert_called_with(f"sbatch --reservation='{reservation_name}' --time={expected_time_limit} {expected_script_path} 650")
+        mock_is_job_running.assert_called_with("12345")
+        mock_check_backend_node.assert_called_with("backend1")
+
+        with pytest.raises(ValueError):
+            client.submit_and_wait(backend=None)
+
 
     # @patch("qmio.clients.run")
     # @patch("random.randint")
