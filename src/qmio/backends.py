@@ -245,8 +245,7 @@ class QPUBackend:
         self._verification_cmd: Optional[str] = None
         if time_within_time_limit(tunnel_time_limit):
             self._tunnel_time_limit = tunnel_time_limit or None
-        if reservation_name:
-            self.reservation_name = reservation_name
+        self.reservation_name = reservation_name or None
         self._logger = logging.getLogger(self.__class__.__name__)
         self._logger.setLevel(logging_level)
         self._logger.info("QPUBackend created")

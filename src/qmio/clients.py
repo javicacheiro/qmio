@@ -247,8 +247,7 @@ class SlurmClient(SlurmBaseClient):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._max_retries: int = 288000
         self._tunnel_time_limit: Optional[str] = TUNNEL_TIME_LIMIT or None
-        if reservation_name:
-            self.reservation_name = reservation_name
+        self.reservation_name = reservation_name or None
 
     def scancel(self, job_id: Optional[str] = None):
         """
@@ -378,10 +377,10 @@ class SlurmClient(SlurmBaseClient):
                 end_endpoint_get = time_ns()
                 self._logger.info(f"Endpoint port got in: {(end_endpoint_get - start)/1e9}")
 
-            if self.reservation_name:
-                self._submit_cmd = f"sbatch --reservation='{reservation_name}' --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
-            else:
+            if not self.reservation_name:
                 self._submit_cmd = f"sbatch --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+            else:
+                self._submit_cmd = f"sbatch --reservation='{self.reservation_name}' --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
 
             stdout, stderr = run(self._submit_cmd)
 
