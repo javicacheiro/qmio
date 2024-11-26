@@ -8,6 +8,9 @@ including logging setup and command execution.
 import logging
 import os
 import subprocess
+import re
+
+from config import MAX_TUNNEL_TIME_LIMIT
 
 # Logger config env attribution
 _LOG_LEVELS = {
@@ -78,3 +81,27 @@ def run(cmd: "str") -> tuple[str, str]:
     if p.returncode != 0:
         raise RunCommandError(p.stderr)
     return p.stdout.decode('utf8'), p.stderr.decode('utf8')
+
+
+def time_to_seconds(time_limit_str: str) -> int:
+    if not re.match(r'^\d{2}:\d{2}:\d{2}$', time_limit_str):
+        raise ValueError(f"Time format specified not valid '{time_limit_str}'. Must be HH:MM:SS.")
+
+    hours, minutes, seconds = map(int, time_limit_str.split(":"))
+
+    if not (0 <= hours <= 23 and 0 <= minutes <= 59 and 0 <= seconds <= 59):
+        raise ValueError(f"Time limit: '{time_limit_str}' has values out of range.")
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def time_within_time_limit(time_limit, max_time_limit: str = MAX_TUNNEL_TIME_LIMIT) -> bool:
+    if not time_limit:
+        return True
+    current_seconds = time_to_seconds(time_limit)
+    max_seconds = time_to_seconds(max_time_limit)
+
+    if current_seconds > max_seconds:
+        raise ValueError(
+            f"Time limit provided '{time_limit}' is outside of the maximun time limit '{max_time_limit}'."
+        )
+    return True

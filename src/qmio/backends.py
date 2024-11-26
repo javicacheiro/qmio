@@ -26,7 +26,7 @@ from typing import Optional, Union
 
 from config import ZMQ_SERVER
 from qmio.clients import SlurmClient, ZMQClient
-from qmio.utils import run
+from qmio.utils import run, time_within_time_limit
 
 logger = logging.getLogger(__name__)
 
@@ -236,7 +236,9 @@ class QPUBackend:
         self._slurmclient: Optional[SlurmClient] = None
         self._job_id = None
         self._verification_cmd: Optional[str] = None
-        self._tunnel_time_limit = tunnel_time_limit or None
+        # Verification of the tunnel time limit missing
+        if time_within_time_limit(tunnel_time_limit):
+            self._tunnel_time_limit = tunnel_time_limit or None
         self._logger = logging.getLogger(self.__class__.__name__)
         self._logger.setLevel(logging_level)
         self._logger.info("QPUBackend created")
