@@ -272,16 +272,14 @@ class QPUBackend:
                 port = match.group(2)
                 self._logger.debug(f"Endpoint IP found: {ip}")
                 self._logger.debug(f"Endpoint PORT found: {port}")
-
+                self._verification_cmd = f"nc -zv {ip} {port}"
+                self._logger.debug(f"Running verification cmd: {self._verification_cmd}")
+                run(self._verification_cmd)
             else:
                 raise RuntimeError(f"Not IP:PORT recovered")
                 # self._logger.error("Not IP:PORT recovered")
                 # sys.exit(1)
 
-        self._verification_cmd = f"nc -zv {ip} {port}"
-        self._logger.debug(f"Running verification cmd: {self._verification_cmd}")
-
-        run(self._verification_cmd)
         end = time.time_ns()
         self._logger.info(f"Connection verified in: {(end - start)/1e9}")
 
