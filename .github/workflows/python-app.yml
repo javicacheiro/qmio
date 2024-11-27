@@ -1,0 +1,39 @@
+name: Python application testing with Hatch
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.11]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Hatch
+      run: |
+        python -m pip install --upgrade pip
+        pip install hatch
+
+    - name: Install project dependencies with Hatch
+      run: |
+        hatch env create
+        hatch env update
+
+    - name: Run tests with Hatch
+      run: |
+        hatch test --all
