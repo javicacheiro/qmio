@@ -1,5 +1,5 @@
 # Qmio
-Python module to interact with the different backends available in the Qmio system at CESGA.
+Python module to interact with different backends available in the Qmio hybrid cluster at CESGA.
 
 ![QmioRuntimeDiagram](docs/Images/QmioRuntimeDiagram.png)
 
