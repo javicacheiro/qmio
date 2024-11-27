@@ -32,8 +32,7 @@ jobs:
     - name: Install project dependencies with Hatch
       run: |
         hatch env create
-        hatch env update
 
     - name: Run tests with Hatch
       run: |
-        hatch test --all
+        hatch test
