@@ -84,6 +84,26 @@ def run(cmd: "str") -> tuple[str, str]:
 
 
 def time_to_seconds(time_limit_str: str) -> int:
+    """Change a time format HH:MM:SS to seconds
+
+    Parameters
+    ----------
+    time_limit_str : str
+        Time limit string formated as HH:MM:SS
+
+    Returns
+    -------
+    : int
+        Number of seconds
+
+    Raises
+    ------
+    ValueError
+        If the time string has not a valid format. Valid format is HH:MM:SS
+
+    ValueError
+        If there is a value out of range in the format specified
+    """
     if not re.match(r'^\d{2}:\d{2}:\d{2}$', time_limit_str):
         raise ValueError(f"Time format specified not valid '{time_limit_str}'. Must be HH:MM:SS.")
 
@@ -95,6 +115,27 @@ def time_to_seconds(time_limit_str: str) -> int:
 
 
 def time_within_time_limit(time_limit, max_time_limit: str = MAX_TUNNEL_TIME_LIMIT) -> bool:
+
+    """Check if the provided time is within the maximun time limit
+
+    Parameters
+    ----------
+    time_limit : str
+        User provided time limit following the format HH:MM:SS
+
+    max_time_limit : str
+        Maximun time limit allowed by the system
+
+    Returns
+    -------
+    : Bool
+        True if the time is within the range
+
+    Raises
+    ------
+    ValueError
+        If the time limit is outside of the time range
+    """
     if not time_limit:
         return True
     current_seconds = time_to_seconds(time_limit)

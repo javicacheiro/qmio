@@ -228,6 +228,10 @@ class SlurmClient(SlurmBaseClient):
         Command to allocate and submit a job to Slurm.
     _max_retries : int
         Number to stablish a time limit to wait for resources in tunneled jobs
+    _tunnel_time_limit : optional, str
+        Time limit tu use for interactive tunnel jobs
+    reservation_name : optrional, str
+        Slurm reservation name provided to aim tunnel jobs towards
 
     Methods
     -------
@@ -353,7 +357,7 @@ class SlurmClient(SlurmBaseClient):
             The port for redirecting connections. If None, a random port between 600 and 699 is used.
         backend : str, optional
             The name of the backend partition where the job is submitted.
-        time_limit: str, optional
+        time_limit : str, optional
             The time limit for the tunner job. If not explicitly set will use the class default -> module default.
 
         Returns

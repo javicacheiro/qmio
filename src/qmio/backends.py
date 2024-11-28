@@ -232,9 +232,9 @@ class QPUBackend:
             The level of logging to use. Defaults to 0.
         logging_filename : str or None, optional
             The filename for logging output. Defaults to None.
-        tunnel_time_limit: str or None, optional
+        tunnel_time_limit : str or None, optional
             Time limit user specified for stablish interactive tunnels
-        reservation_name: str or None, optional
+        reservation_name : str or None, optional
             reservation name user specified
         """
         self._backend = "qpu"
