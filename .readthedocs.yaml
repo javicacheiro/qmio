@@ -16,14 +16,14 @@ python:
     - method: pip
       path: .
 
-  jobs:
-    post_create_environment:
-      - python -m pip install --upgrade pip
-      - pip install hatch
-    pre_build:
-      - hatch run docs:pre-build
-    post_build:
-      - hatch run docs:build-docs
+  # jobs:
+  #   post_create_environment:
+  #     - python -m pip install --upgrade pip
+  #     - pip install hatch
+  #   pre_build:
+  #     - hatch run docs:pre-build
+  #   post_build:
+  #     - hatch run docs:build-docs
 
 sphinx:
   configuration: docs/source/conf.py
