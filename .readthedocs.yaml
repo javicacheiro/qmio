@@ -10,6 +10,12 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
+# Python environment
+python:
+  install:
+    - method: pip
+      path: .
+
   jobs:
     post_create_environment:
       - python -m pip install --upgrade pip
@@ -18,11 +24,6 @@ build:
       - hatch run docs:pre-build
     post_build:
       - hatch run docs:build-docs
-
-python:
-  install:
-    - method: pip
-      path: .
 
 sphinx:
   configuration: docs/source/conf.py
