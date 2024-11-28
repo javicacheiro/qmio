@@ -11,13 +11,13 @@ build:
   tools:
     python: "3.11"
   jobs:
-    post_create_environment: |
-      python -m pip install --upgrade pip
-      pip install hatch
-    pre_build: |
-      hatch run docs:pre-build
-    post_build: |
-      hatch run docs:build-docs
+    post_create_environment:
+      - python -m pip install --upgrade pip
+      - pip install hatch
+    pre_build:
+      - hatch run docs:pre-build
+    post_build:
+      - hatch run docs:build-docs
 
 python:
   install:
