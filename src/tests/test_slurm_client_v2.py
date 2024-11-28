@@ -27,10 +27,10 @@ class TestSlurmClient:
         client = SlurmClient()
         # Caso cuando el trabajo está corriendo
         mock_run.return_value = ("RUNNING", "")
-        assert client._is_job_running(12345) == True
+        assert client._is_job_running(12345) is True
         # Caso cuando el trabajo no está corriendo
         mock_run.return_value = ("", "")
-        assert client._is_job_running(12345) == False
+        assert client._is_job_running(12345) is False
         # Verificamos que se llamó con el comando correcto
         mock_run.assert_called_with("scontrol show job 12345")
         client._job_id = 54321
@@ -194,4 +194,4 @@ class TestSlurmClient:
         # Verificamos que se lanza SystemExit al interrumpir con teclado
         client.submit_and_wait(backend="backend1")
         mock_scancel.assert_called_once_with("12345")
-        assert client._job_id == None
+        assert client._job_id is None

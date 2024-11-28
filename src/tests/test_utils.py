@@ -47,9 +47,9 @@ def test_time_to_seconds():
 
 
 def test_time_within_time_limit():
-    assert time_within_time_limit("") == True
-    assert time_within_time_limit("00:03:00") == True
-    assert time_within_time_limit(MAX_TUNNEL_TIME_LIMIT) == True
+    assert time_within_time_limit("") is True
+    assert time_within_time_limit("00:03:00") is True
+    assert time_within_time_limit(MAX_TUNNEL_TIME_LIMIT) is True
     time_limit = "00:50:00"
     with pytest.raises(ValueError, match=f"Time limit provided '{time_limit}' is outside of the maximun time limit '{MAX_TUNNEL_TIME_LIMIT}'."):
         time_within_time_limit(time_limit=time_limit)

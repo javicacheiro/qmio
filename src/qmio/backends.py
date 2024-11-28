@@ -289,7 +289,7 @@ class QPUBackend:
                 self._logger.debug(f"Running verification cmd: {self._verification_cmd}")
                 run(self._verification_cmd)
             else:
-                raise RuntimeError(f"Not IP:PORT recovered")
+                raise RuntimeError("Not IP:PORT recovered")
                 # self._logger.error("Not IP:PORT recovered")
                 # sys.exit(1)
 
