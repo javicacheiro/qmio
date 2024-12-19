@@ -78,7 +78,9 @@ def _optimization_options_builder(
     return opt_value
 
 
-def _results_format_builder(res_format: str = "binary_count") -> tuple[int, int]:
+def _results_format_builder(
+        res_format: str = "binary_count"
+) -> tuple[int, int]:
     """
     Builds the results format without using QAT.
 
@@ -110,14 +112,30 @@ def _results_format_builder(res_format: str = "binary_count") -> tuple[int, int]
         If the provided `res_format` is not a valid result format.
     """
     match = {
-        "binary_count": {"InlineResultsProcessing": 1, "ResultsFormatting": 3},
-        "raw": {"InlineResultsProcessing": 1, "ResultsFormatting": 2},
-        "binary": {"InlineResultsProcessing": 2, "ResultsFormatting": 2},
-        "squash_binary_result_arrays": {"InlineResultsProcessing": 2, "ResultsFormatting": 6}
+        "binary_count": {
+            "InlineResultsProcessing": 1,
+            "ResultsFormatting": 3
+        },
+        "raw": {
+            "InlineResultsProcessing": 1,
+            "ResultsFormatting": 2
+        },
+        "binary": {
+            "InlineResultsProcessing": 2,
+            "ResultsFormatting": 2
+        },
+        "squash_binary_result_arrays": {
+            "InlineResultsProcessing": 2,
+            "ResultsFormatting": 6
+        }
     }
     if res_format not in match.keys():
         raise KeyError(f"{res_format}: Not a valid result format")
-    return match[res_format]["InlineResultsProcessing"], match[res_format]["ResultsFormatting"]
+
+    return (
+        match[res_format]["InlineResultsProcessing"],
+        match[res_format]["ResultsFormatting"],
+    )
 
 
 def _config_builder(
@@ -142,7 +160,9 @@ def _config_builder(
         config_str: str : json-string object that is sent and loaded in the
             server side
     """
-    inlineResultsProcessing, resultsFormatting = _results_format_builder(res_format)
+    inlineResultsProcessing, resultsFormatting = (
+        _results_format_builder(res_format)
+    )
     opt_value = _optimization_options_builder(optimization=optimization)
     start = time.time_ns()
     config = {
@@ -202,13 +222,14 @@ class QPUBackend:
         _tunnel_time_limit: str, Optional
             User provided time limit to stablish the tunnel job
         reservation_name: str, Optional
-            User provided reservation name to stablish tunnel to. Just active if
-    provided.
+            User provided reservation name to stablish tunnel to. Just active
+    if provided.
 
     PrivateMethods
     --------------
     _verify_connection()
-        Runs a connection verification command before trying to send any message
+        Runs a connection verification command before trying to send any
+    message
 
     ContextHandlers
     ---------------
@@ -263,8 +284,8 @@ class QPUBackend:
         Parameters
         ----------
         endpoint : Optional[str], default=None
-            The endpoint to connect to. If not provided, it's picked up from the
-        class attribute.
+            The endpoint to connect to. If not provided, it's picked up from
+        the class attribute.
 
         Returns
         -------
@@ -293,7 +314,9 @@ class QPUBackend:
                 self._logger.debug(f"Endpoint IP found: {ip}")
                 self._logger.debug(f"Endpoint PORT found: {port}")
                 self._verification_cmd = f"nc -zv {ip} {port}"
-                self._logger.debug(f"Running verification cmd: {self._verification_cmd}")
+                self._logger.debug(
+                    f"Running verification cmd: {self._verification_cmd}"
+                )
                 run(self._verification_cmd)
             else:
                 raise RuntimeError("Not IP:PORT recovered")
@@ -336,24 +359,29 @@ class QPUBackend:
         """
         self._logger.info("Connect started")
         start = time.time_ns()
-        # Check if endpoint is provided before trying to submit and wait for job
         if not self._endpoint:
             self._logger.debug("You are outside of the frontal node.")
             self._logger.debug("Starting the redirection process.")
 
             if not self._slurmclient:
-                self._slurmclient = SlurmClient(reservation_name=self.reservation_name) if self.reservation_name else SlurmClient()
+                self._slurmclient = (
+                    SlurmClient(reservation_name=self.reservation_name)
+                    if self.reservation_name
+                    else SlurmClient())
 
             self._job_id, self._endpoint = self._slurmclient.submit_and_wait(
                 backend=self._backend,
                 time_limit=self._tunnel_time_limit
             )
             self._logger.debug(
-                f"Returns of submit and wait: job_id = {self._job_id}& endpoint = {self._endpoint}"
+                f"Returns of submit and wait: job_id = {self._job_id}& "
+                f"endpoint = {self._endpoint}"
             )
             time.sleep(0.3)
             end_tunnel_job = time.time_ns()
-            self._logger.info(f"Tunnel job stablished in: {(end_tunnel_job - start)/1e9}")
+            self._logger.info(
+                f"Tunnel job stablished in: {(end_tunnel_job - start)/1e9}"
+            )
 
         # Verify the connection
         self._verify_connection()
@@ -389,7 +417,9 @@ class QPUBackend:
             while self._slurmclient._is_job_running(self._job_id):
                 try:
                     self._slurmclient.scancel(self._job_id)
-                    self._logger.debug(f"Sending scancel to Tunnel job {self._job_id}.")
+                    self._logger.debug(
+                        f"Sending scancel to Tunnel job {self._job_id}."
+                    )
                 except Exception as e:
                     self._logger.debug(f"Error cancelling the job: {e}")
                 time.sleep(0.5)
@@ -428,7 +458,9 @@ class QPUBackend:
         self.disconnect()
         self.connect()
         end_flush = time.time_ns()
-        self._logger.info(f"Flushing completed in: {(end_flush - start_flush)/1e9}")
+        self._logger.info(
+            f"Flushing completed in: {(end_flush - start_flush)/1e9}"
+        )
 
     def run(
         self,
@@ -460,8 +492,8 @@ class QPUBackend:
 
             - "raw": Raw results.
             - "binary": Results as a binary string.
-            - "binary_count": Returns a count of each instance of measured qubit
-        registers.
+            - "binary_count": Returns a count of each instance of measured
+        qubit registers.
             - "squash_binary_result_arrays": Squashes binary result list into a
         singular bit string.
 
@@ -497,7 +529,10 @@ class QPUBackend:
 
         # If there is a job_id but it is not running
         # reopen the connection. The Tunnel job ended unexpectedly
-        if self._job_id and not self._slurmclient._is_job_running(self._job_id):
+        if (
+            self._job_id
+            and not self._slurmclient._is_job_running(self._job_id)
+        ):
             self._state_flush()
 
         # Build config using _config_builder function
@@ -507,7 +542,6 @@ class QPUBackend:
             optimization=optimization,
             res_format=res_format,
         )
-
 
         # Create a job tuple with the circuit and config
         job = (circuit, config)

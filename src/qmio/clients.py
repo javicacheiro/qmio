@@ -196,15 +196,20 @@ class SlurmBaseClient(abc.ABC):
         self._check_cmd = None
 
     @abc.abstractmethod
-    def scancel(self, job_id): # pragma: no cover
+    def scancel(self, job_id):  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def _is_job_running(self, job_id=None) -> bool: # pragma: no cover
+    def _is_job_running(self, job_id=None) -> bool:  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def submit_and_wait(self, endpoint_port=None, backend=None, time_limit: Optional[str] = None) -> tuple[Optional[str], Optional[str]]: # pragma: no cover
+    def submit_and_wait(
+            self,
+            endpoint_port=None,
+            backend=None,
+            time_limit: Optional[str] = None
+    ) -> tuple[Optional[str], Optional[str]]:  # pragma: no cover
         pass
 
 
@@ -275,7 +280,9 @@ class SlurmClient(SlurmBaseClient):
         self._scancel_cmd = f"scancel {job_id}"
         run(self._scancel_cmd)
         end = time_ns()
-        self._logger.info(f"Slurm cancelation happended in: {(end - start)/1e9}")
+        self._logger.info(
+            f"Slurm cancelation happended in: {(end - start)/1e9}"
+        )
 
     def _is_job_running(self, job_id=None) -> bool:
         """
@@ -346,9 +353,17 @@ class SlurmClient(SlurmBaseClient):
             self._logger.info(f"backend node checked in: {(end - start)/1e9}")
             return ip
         else:
-            raise ValueError(f'No result came from: "{_check_node_cmd}" Does not fit a NodeName')
+            raise ValueError(
+                f'No result came from: "{_check_node_cmd}"'
+                'Does not fit a NodeName'
+            )
 
-    def submit_and_wait(self, endpoint_port=None, backend=None, time_limit: Optional[str] = None):
+    def submit_and_wait(
+            self,
+            endpoint_port=None,
+            backend=None,
+            time_limit: Optional[str] = None
+    ):
         """
         Submit the tunnel job to Slurm and wait for it to start.
 
@@ -358,8 +373,8 @@ class SlurmClient(SlurmBaseClient):
         Parameters
         ----------
         endpoint_port : int, optional
-            The port for redirecting connections. If None, a random port between
-        600 and 699 is used.
+            The port for redirecting connections. If None, a random port
+        between 600 and 699 is used.
         backend : str, optional
             The name of the backend partition where the job is submitted.
         time_limit : str, optional
@@ -385,12 +400,21 @@ class SlurmClient(SlurmBaseClient):
             if endpoint_port is None:
                 self._endpoint_port = random.randint(600, 699)
                 end_endpoint_get = time_ns()
-                self._logger.info(f"Endpoint port got in: {(end_endpoint_get - start)/1e9}")
+                self._logger.info(
+                    f"Endpoint port got in: {(end_endpoint_get - start)/1e9}"
+                )
 
             if not self.reservation_name:
-                self._submit_cmd = f"sbatch --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+                self._submit_cmd = (
+                    f"sbatch --time={time_limit or self._tunnel_time_limit}"
+                    f" {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+                )
             else:
-                self._submit_cmd = f"sbatch --reservation='{self.reservation_name}' --time={time_limit or self._tunnel_time_limit} {slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+                self._submit_cmd = (
+                    f"sbatch --reservation='{self.reservation_name}' "
+                    f"--time={time_limit or self._tunnel_time_limit} "
+                    f"{slurm_scripts_dir}{backend}.sh {self._endpoint_port}"
+                )
 
             stdout, stderr = run(self._submit_cmd)
 
@@ -400,24 +424,35 @@ class SlurmClient(SlurmBaseClient):
 
             match = re.search(r"Submitted batch job (\d+)", stdout)
             if not match:
-                raise RunCommandError(f"Failed to find job ID in command output: {stdout}")
+                raise RunCommandError(
+                    f"Failed to find job ID in command output: {stdout}"
+                )
 
             self._job_id = match.group(1)
 
-            self._logger.info(f"Submitting Tunnel job to slurm: {self._job_id}")
+            self._logger.info(
+                f"Submitting Tunnel job to slurm: {self._job_id}"
+            )
             end_submission = time_ns()
-            self._logger.info(f"Tunnel Job submitted in: {(end_submission - start)/1e9}")
+            self._logger.info(
+                f"Tunnel Job submitted in: {(end_submission - start)/1e9}"
+            )
 
             count = 0
             # Max number of retries to not allow anf infinite loop
             # (8hours*60*60)*0,1timeslice = 288000
-            while not self._is_job_running(self._job_id) and count < self._max_retries:
+            while (
+                    not self._is_job_running(self._job_id)
+                    and count < self._max_retries
+            ):
                 sleep(0.1)
                 if count % 30 == 0:
                     print("Waiting for resources\r", end="")
                 count += 1
                 if count >= self._max_retries:
-                    raise TimeoutError("Tunnel did not start withing the 8h time frame")
+                    raise TimeoutError(
+                        "Tunnel did not start withing the 8h time frame"
+                    )
 
             self._logger.info("The job started")
             print("\r")
@@ -431,11 +466,15 @@ class SlurmClient(SlurmBaseClient):
             self._logger.debug(f"Endpoint port value {self._endpoint_port}")
 
             end_submit_and_wait = time_ns()
-            self._logger.info(f"Tunnel Job running in: {(end_submit_and_wait - start)/1e9}")
+            self._logger.info(
+                f"Tunnel Job running in: {(end_submit_and_wait - start)/1e9}"
+            )
             return self._job_id, endpoint
         except KeyboardInterrupt:
             self.scancel(self._job_id)
-            self._logger.info(f"Job {self._job_id} cancelled by Keyboard Interruption")
+            self._logger.info(
+                f"Job {self._job_id} cancelled by Keyboard Interruption"
+            )
             self._job_id = endpoint = None
             # sys.exit(1)
             return self._job_id, endpoint
