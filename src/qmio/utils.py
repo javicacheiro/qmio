@@ -157,6 +157,6 @@ def time_within_time_limit(
     if current_seconds > max_seconds:
         raise ValueError(
             f"Time limit provided '{time_limit}' is outside of the maximun"
-            " time limit '{max_time_limit}'."
+            f" time limit '{max_time_limit}'."
         )
     return True
