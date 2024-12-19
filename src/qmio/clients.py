@@ -48,7 +48,8 @@ class ZMQBase:
     Parameters
     ----------
     socket_type : int
-        The type of socket to create. This is typically a ZeroMQ socket type (e.g., zmq.REQ, zmq.REP).
+        The type of socket to create. This is typically a ZeroMQ socket type
+    (e.g., zmq.REQ, zmq.REP).
 
     Attributes
     ----------
@@ -238,7 +239,8 @@ class SlurmClient(SlurmBaseClient):
     scancel(job_id):
         Cancels the job with the given job ID.
     submit(endpoint_port):
-        Submits a tunnel job to redirect connections to the specified endpoint port.
+        Submits a tunnel job to redirect connections to the specified endpoint
+    port.
     _is_job_running(job_id):
         Checks if the job with the specified job ID is currently running.
     """
@@ -260,7 +262,8 @@ class SlurmClient(SlurmBaseClient):
         Parameters
         ----------
         job_id : str, optional
-            The ID of the job to be canceled. If None, the instance's job ID is used.
+            The ID of the job to be canceled. If None, the instance's job ID is
+        used.
 
         Returns
         -------
@@ -321,7 +324,8 @@ class SlurmClient(SlurmBaseClient):
         Raises
         ------
         RunCommandError
-            If no backend is specified or if the command fails to retrieve the node IP.
+            If no backend is specified or if the command fails to retrieve the
+        node IP.
         """
         start = time_ns()
         if not backend:
@@ -354,11 +358,13 @@ class SlurmClient(SlurmBaseClient):
         Parameters
         ----------
         endpoint_port : int, optional
-            The port for redirecting connections. If None, a random port between 600 and 699 is used.
+            The port for redirecting connections. If None, a random port between
+        600 and 699 is used.
         backend : str, optional
             The name of the backend partition where the job is submitted.
         time_limit : str, optional
-            The time limit for the tunner job. If not explicitly set will use the class default -> module default.
+            The time limit for the tunner job. If not explicitly set will use
+        the class default -> module default.
 
         Returns
         -------

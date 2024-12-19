@@ -40,9 +40,12 @@ def _setup_logging():
     log_level_str = os.getenv('LOG_LEVEL', 'WARNING').upper()
     log_level = _LOG_LEVELS.get(log_level_str, logging.WARNING)
 
-    logging.basicConfig(level=log_level,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        handlers=[logging.StreamHandler()])
+    logging.basicConfig(
+        level=log_level,
+        format=(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        ),
+        handlers=[logging.StreamHandler()])
 
 
 class RunCommandError(Exception):
@@ -104,17 +107,27 @@ def time_to_seconds(time_limit_str: str) -> int:
     ValueError
         If there is a value out of range in the format specified
     """
-    if not re.match(r'^\d{2}:\d{2}:\d{2}$', time_limit_str):
-        raise ValueError(f"Time format specified not valid '{time_limit_str}'. Must be HH:MM:SS.")
+    if not re.match(
+            r'^\d{2}:\d{2}:\d{2}$', time_limit_str
+    ):
+        raise ValueError(
+            f"Time format specified not valid '{time_limit_str}'."
+            " Must be HH:MM:SS."
+        )
 
     hours, minutes, seconds = map(int, time_limit_str.split(":"))
 
     if not (0 <= hours <= 23 and 0 <= minutes <= 59 and 0 <= seconds <= 59):
-        raise ValueError(f"Time limit: '{time_limit_str}' has values out of range.")
+        raise ValueError(
+            f"Time limit: '{time_limit_str}' has values out of range."
+        )
     return hours * 3600 + minutes * 60 + seconds
 
 
-def time_within_time_limit(time_limit, max_time_limit: str = MAX_TUNNEL_TIME_LIMIT) -> bool:
+def time_within_time_limit(
+        time_limit,
+        max_time_limit: str = MAX_TUNNEL_TIME_LIMIT
+) -> bool:
 
     """Check if the provided time is within the maximun time limit
 
@@ -143,6 +156,7 @@ def time_within_time_limit(time_limit, max_time_limit: str = MAX_TUNNEL_TIME_LIM
 
     if current_seconds > max_seconds:
         raise ValueError(
-            f"Time limit provided '{time_limit}' is outside of the maximun time limit '{max_time_limit}'."
+            f"Time limit provided '{time_limit}' is outside of the maximun"
+            " time limit '{max_time_limit}'."
         )
     return True
