@@ -9,13 +9,15 @@ _optimization_options_builder(optimization, optimization_backend="Tket")
 _results_format_builder(res_format="binary_count")
     Builds the results format for the backend.
 
-_config_builder(shots: int, repetition_period=None, optimization=0, res_format="binary_count")
-    Builds the configuration for the circuit execution, including shots, repetition period, optimization level, and result format.
+_config_builder(shots: int, repetition_period=None, optimization=0,
+    res_format="binary_count")
+    Builds the configuration for the circuit execution, including shots,
+    repetition period, optimization level, and result format.
 
 Classes
 -------
 QPUBackend
-    Class to manage execution of quantum circuits on a Quantum Processing Unit (QPU).
+    Class to manage execution of quantum circuits on a Quantum Processing Unit.
 """
 
 import json
@@ -80,8 +82,8 @@ def _results_format_builder(res_format: str = "binary_count") -> tuple[int, int]
     """
     Builds the results format without using QAT.
 
-    This function returns the InlineResultsProcessing and ResultFormatting integers
-    to be used as input for the configuration builder.
+    This function returns the InlineResultsProcessing and ResultFormatting
+    integers to be used as input for the configuration builder.
 
     Parameters
     ----------
@@ -89,15 +91,18 @@ def _results_format_builder(res_format: str = "binary_count") -> tuple[int, int]
         The format in which the results will be processed.
         Possible values are:
 
-        - "binary_count": Returns a count of each instance of measured qubit registers. Switches result format to raw.
+        - "binary_count": Returns a count of each instance of measured qubit
+    registers. Switches result format to raw.
         - "binary": Returns results as a binary string.
         - "raw": Returns raw results.
-        - "squash_binary_result_arrays": Squashes binary result list into a singular bit string. Switches results to binary.
+        - "squash_binary_result_arrays": Squashes binary result list into a
+    singular bit string. Switches results to binary.
 
     Returns
     -------
     tuple of int
-        A tuple containing two integers: InlineResultsProcessing and ResultsFormatting.
+        A tuple containing two integers: InlineResultsProcessing and
+    ResultsFormatting.
 
     Raises
     ------
@@ -197,12 +202,13 @@ class QPUBackend:
         _tunnel_time_limit: str, Optional
             User provided time limit to stablish the tunnel job
         reservation_name: str, Optional
-            User provided reservation name to stablish tunnel to. Just active if provided.
+            User provided reservation name to stablish tunnel to. Just active if
+    provided.
 
     PrivateMethods
     --------------
     _verify_connection()
-        Runs a connection verification command before trying to send any message.
+        Runs a connection verification command before trying to send any message
 
     ContextHandlers
     ---------------
@@ -257,7 +263,8 @@ class QPUBackend:
         Parameters
         ----------
         endpoint : Optional[str], default=None
-            The endpoint to connect to. If not provided, it's picked up from the class attribute.
+            The endpoint to connect to. If not provided, it's picked up from the
+        class attribute.
 
         Returns
         -------
@@ -434,12 +441,14 @@ class QPUBackend:
         """
         Run a circuit in the QPU.
 
-        This method submits a circuit with specified options to the QPU for execution.
+        This method submits a circuit with specified options to the QPU for
+        execution.
 
         Parameters
         ----------
         circuit : str
-            The circuit to be executed. It can be in OpenQASM 3.0, OpenPulse grammar, or QIR string format.
+            The circuit to be executed. It can be in OpenQASM 3.0, OpenPulse
+        grammar, or QIR string format.
         shots : int
             The number of times the circuit is executed.
         repetition_period : Optional[float], default=None
@@ -451,8 +460,10 @@ class QPUBackend:
 
             - "raw": Raw results.
             - "binary": Results as a binary string.
-            - "binary_count": Returns a count of each instance of measured qubit registers.
-            - "squash_binary_result_arrays": Squashes binary result list into a singular bit string.
+            - "binary_count": Returns a count of each instance of measured qubit
+        registers.
+            - "squash_binary_result_arrays": Squashes binary result list into a
+        singular bit string.
 
         Returns
         -------
@@ -472,7 +483,11 @@ class QPUBackend:
         >>> res_format = "binary_count"
 
         >>> with service.backends(name="qpu") as backend:
-        >>>     results = backend.run(circuit, shots, repetition_period, optimization, res_format)
+        >>>     results = backend.run(circuit,
+        >>>                           shots,
+        >>>                           repetition_period,
+        >>>                           optimization,
+        >>>                           res_format)
         """
         start = time.time_ns()
         self._logger.info("Run started")
