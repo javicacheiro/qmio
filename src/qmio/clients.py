@@ -25,7 +25,6 @@ import random
 import re
 from enum import Enum
 
-# Under testing
 from time import sleep, time, time_ns
 
 import zmq
@@ -192,8 +191,9 @@ class ZMQClient(ZMQBase):
         self._logger.info(f"Results awaited for: {(end - start)/1e9}")
         return result
 
-    def api_version(self):
-        return self._send((Messages.VERSION.value,))
+    def rpc_version(self):
+        self._send((Messages.VERSION.value,))
+        return self._await_results()
 
 
 class SlurmBaseClient(abc.ABC):
