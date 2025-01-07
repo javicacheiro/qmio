@@ -92,11 +92,10 @@ def test_close_socket(zmq_client):
 
 def test_rpc_version(zmq_client):
     client, mock_socket = zmq_client
-    # Simular el comportamiento del socket para que devuelva la respuesta esperada
     expected_response = {'qat_rpc_version': '0.6.0'}
-    mock_socket.recv_pyobj.return_value = expected_response  # Simula recv_pyobj
+    mock_socket.recv_pyobj.return_value = expected_response
     rpc_version = client.rpc_version()
-    # Asegurarse de que la función _send se llamó con el mensaje correcto
-    client._socket.send_pyobj.assert_called_once_with((Messages.VERSION.value,))  # Ajustar según lo que _send mande
-    # Verificar que rpc_version devuelve la respuesta esperada
+    client._socket.send_pyobj.assert_called_once_with(
+        (Messages.VERSION.value,)
+    )
     assert rpc_version == expected_response
