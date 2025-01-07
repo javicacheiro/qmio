@@ -1,7 +1,7 @@
 import pytest
 import zmq
 from unittest.mock import MagicMock
-from qmio.clients import ZMQClient  # Asegúrate de cambiar esto a tu nombre de módulo
+from qmio.clients import ZMQClient, Messages  # Asegúrate de cambiar esto a tu nombre de módulo
 
 
 @pytest.fixture
@@ -14,6 +14,7 @@ def zmq_client(mocker):
     client = ZMQClient(address="tcp://10.133.29.226:5556")
     client._context = mock_context.return_value
     client._socket = mock_socket
+
     return client, mock_socket
 
 
@@ -88,3 +89,14 @@ def test_close_socket(zmq_client):
 #     del client
 #     # Verifica que `close` fue llamado una vez en el mock
 #     mock_close.assert_called_once()
+
+def test_rpc_version(zmq_client):
+    client, mock_socket = zmq_client
+    # Simular el comportamiento del socket para que devuelva la respuesta esperada
+    expected_response = {'qat_rpc_version': '0.6.0'}
+    mock_socket.recv_pyobj.return_value = expected_response  # Simula recv_pyobj
+    rpc_version = client.rpc_version()
+    # Asegurarse de que la función _send se llamó con el mensaje correcto
+    client._socket.send_pyobj.assert_called_once_with((Messages.VERSION.value,))  # Ajustar según lo que _send mande
+    # Verificar que rpc_version devuelve la respuesta esperada
+    assert rpc_version == expected_response
