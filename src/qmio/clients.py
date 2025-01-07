@@ -23,6 +23,7 @@ import logging
 import os
 import random
 import re
+from enum import Enum
 
 # Under testing
 from time import sleep, time, time_ns
@@ -37,6 +38,14 @@ logger = logging.getLogger(__name__)
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 slurm_scripts_dir = os.path.join(base_dir, 'slurm_scripts/')
+
+
+class Messages(Enum):
+    PROGRAM = "program"
+    VERSION = "version"
+    COUPLINGS = "couplings"
+    QUBIT_INFO = "qubit_info"
+    QPU_INFO = "qpu_info"
 
 
 class ZMQBase:
@@ -182,6 +191,9 @@ class ZMQClient(ZMQBase):
         end = time_ns()
         self._logger.info(f"Results awaited for: {(end - start)/1e9}")
         return result
+
+    def api_version(self):
+        return self._send((Messages.VERSION.value,))
 
 
 class SlurmBaseClient(abc.ABC):
