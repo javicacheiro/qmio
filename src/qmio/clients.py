@@ -18,7 +18,6 @@ SlurmClient
     used to get a tunnel going.
 
 """
-import abc
 import logging
 import os
 import random
@@ -31,7 +30,7 @@ import zmq
 from typing import Optional
 
 from config import TUNNEL_TIME_LIMIT
-from qmio.utils import RunCommandError, run
+from qmio.utils import BackendError, OutputParsingError, run
 
 logger = logging.getLogger(__name__)
 
@@ -177,11 +176,6 @@ class ZMQClient(ZMQBase):
         -------
         Any
             The result received from the server.
-
-        Raises
-        ------
-        RuntimeError
-            If the connection fails or results cannot be received.
         """
         start = time_ns()
         result = None
@@ -192,40 +186,13 @@ class ZMQClient(ZMQBase):
         return result
 
     def rpc_version(self):
+        """Recovers the rpc server version number
+        """
         self._send((Messages.VERSION.value,))
         return self._await_results()
 
 
-class SlurmBaseClient(abc.ABC):
-    """
-    Slurm Base Client Abstract Class
-    """
-    def __init__(self):
-        self._job_id = None
-        self._endpoint_port = None
-        self._submit_cmd = None
-        self._scancel_cmd = None
-        self._check_cmd = None
-
-    @abc.abstractmethod
-    def scancel(self, job_id):  # pragma: no cover
-        pass
-
-    @abc.abstractmethod
-    def _is_job_running(self, job_id=None) -> bool:  # pragma: no cover
-        pass
-
-    @abc.abstractmethod
-    def submit_and_wait(
-            self,
-            endpoint_port=None,
-            backend=None,
-            time_limit: Optional[str] = None
-    ) -> tuple[Optional[str], Optional[str]]:  # pragma: no cover
-        pass
-
-
-class SlurmClient(SlurmBaseClient):
+class SlurmClient():
     """
     Slurm client class.
 
@@ -266,7 +233,11 @@ class SlurmClient(SlurmBaseClient):
             time_limit: Optional[str] = None,
             reservation_name: Optional[str] = None,
     ):
-        super().__init__()
+        self._job_id = None
+        self._endpoint_port = None
+        self._submit_cmd = None
+        self._scancel_cmd = None
+        self._check_cmd = None
         self._logger = logging.getLogger(self.__class__.__name__)
         self._max_retries: int = 288000
         self._tunnel_time_limit: Optional[str] = TUNNEL_TIME_LIMIT or None
@@ -342,13 +313,15 @@ class SlurmClient(SlurmBaseClient):
 
         Raises
         ------
-        RunCommandError
+        BackendError
             If no backend is specified or if the command fails to retrieve the
         node IP.
         """
         start = time_ns()
         if not backend:
-            raise RunCommandError('No backend spedified')
+            raise BackendError(
+                'No backend spedified',
+            )
         _check_node_cmd = f'scontrol show partition {backend}'
         stdout, stderr = run(_check_node_cmd)
         self._logger.debug(f'stdout: {stdout}\n stderr: {stderr}')
@@ -375,7 +348,7 @@ class SlurmClient(SlurmBaseClient):
             endpoint_port=None,
             backend=None,
             time_limit: Optional[str] = None
-    ):
+    ) -> tuple[Optional[str], Optional[str]]:
         """
         Submit the tunnel job to Slurm and wait for it to start.
 
@@ -436,8 +409,9 @@ class SlurmClient(SlurmBaseClient):
 
             match = re.search(r"Submitted batch job (\d+)", stdout)
             if not match:
-                raise RunCommandError(
-                    f"Failed to find job ID in command output: {stdout}"
+                raise OutputParsingError(
+                    f"Failed to find job ID in command output: {stdout}",
+                    stdout,
                 )
 
             self._job_id = match.group(1)
