@@ -49,15 +49,44 @@ def _setup_logging():
 
 
 class RunCommandError(Exception):
-    """Exception raised for errors in running a command.
+    """Exception raised for errors in running a command."""
+    def __init__(self, cmd, returncode, stderr):
+        hint = ("Ensure the required software is installed and available in"
+                "your PATH.")
+        super().__init__(f"Command '{cmd}' failed with return code "
+                         f"{returncode}:\n{stderr}\nHint: {hint}")
+        self.cmd = cmd
+        self.returncode = returncode
+        self.stderr = stderr
 
-    This exception is raised when a command executed by the
-    `run` function fails to execute successfully.
-    """
-    pass
+
+class CommandNotFoundError(RunCommandError):
+    """Raised when a required command is not found."""
+    def __init__(self, cmd):
+        hint = (f"Ensure the command '{cmd}' is installed"
+                " and available in your PATH.")
+        super().__init__(cmd, 127, hint)
 
 
-def run(cmd: "str") -> tuple[str, str]:
+class ReservationError(RunCommandError):
+    """Raised when there is an issue with the reservation system."""
+    def __init__(self, cmd, stderr):
+        hint = (
+            "Check if there is an active reservation using"
+            "`scontrol show reservations`, "
+            "or verify that your reservation parameters are correct."
+        )
+        super().__init__(cmd, 1, f"{stderr}\nHint: {hint}")
+
+
+class GenericSystemError(RunCommandError):
+    """Generic system error for unexpected failures."""
+    def __init__(self, cmd, returncode, stderr):
+        hint = "Review the system configuration and logs for more details."
+        super().__init__(cmd, returncode, f"{stderr}\nHint: {hint}")
+
+
+def run(cmd: str) -> tuple[str, str]:
     """Execute a shell command.
 
     This function runs the specified command in the shell and
@@ -80,10 +109,17 @@ def run(cmd: "str") -> tuple[str, str]:
         If the command returns a non-zero exit status, indicating
         that an error occurred during execution.
     """
-    p = subprocess.run(cmd, shell=True, capture_output=True, check=False)
+    logging.debug(f"Executing command: {cmd}")
+    p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     if p.returncode != 0:
-        raise RunCommandError(p.stderr)
-    return p.stdout.decode('utf8'), p.stderr.decode('utf8')
+        logging.error(f"Command failed: {cmd} | Return code: {p.returncode} | Error: {p.stderr}")
+        if p.returncode == 127:
+            raise CommandNotFoundError(cmd)
+        elif "reservation is invalid" in p.stderr:
+            raise ReservationError(cmd, p.stderr)
+        else:
+            raise GenericSystemError(cmd, p.returncode, p.stderr)
+    return p.stdout, p.stderr
 
 
 def time_to_seconds(time_limit_str: str) -> int:
