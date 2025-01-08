@@ -1,7 +1,7 @@
 from config import MAX_TUNNEL_TIME_LIMIT
 import pytest
 from unittest.mock import patch, MagicMock
-from qmio.utils import run, RunCommandError, time_to_seconds, time_within_time_limit
+from qmio.utils import ReservationError ,GenericSystemError , CommandNotFoundError, run, RunCommandError, time_to_seconds, time_within_time_limit
 
 
 @patch("qmio.utils.subprocess.run")
@@ -34,6 +34,39 @@ def test_run_failure(mock_subprocess_run):
         run("fake command")
     # Verificamos que subprocess.run fue llamado correctamente
     mock_subprocess_run.assert_called_once_with("fake command", shell=True, capture_output=True, text=True)
+
+
+@patch("qmio.utils.subprocess.run")
+def test_run_exceptions(mock_subprocess_run):
+    # Simular que subprocess.run falla con diferentes códigos de error
+    mock_completed_process = MagicMock()
+
+    # Caso genérico de fallo (RunCommandError)
+    mock_completed_process.returncode = 1
+    mock_completed_process.stderr = 'Generic error occurred'
+    mock_subprocess_run.return_value = mock_completed_process
+    with pytest.raises(GenericSystemError, match="Generic error occurred"):
+        run("generic command")
+    mock_subprocess_run.assert_called_with("generic command", shell=True, capture_output=True, text=True)
+
+    # Caso de comando no encontrado (CommandNotFoundError)
+    mock_completed_process.returncode = 127
+    mock_completed_process.stderr = 'Command not found'
+    mock_subprocess_run.return_value = mock_completed_process
+    with pytest.raises(CommandNotFoundError, match="Command 'missing command' failed"):
+        run("missing command")
+    mock_subprocess_run.assert_called_with("missing command", shell=True, capture_output=True, text=True)
+
+    # Caso de error en reserva (ReservationError)
+    mock_completed_process.returncode = 1
+    mock_completed_process.stderr = 'The reservation is invalid'
+    mock_subprocess_run.return_value = mock_completed_process
+    with pytest.raises(ReservationError, match="The reservation is invalid"):
+        run("reservation command")
+    mock_subprocess_run.assert_called_with("reservation command", shell=True, capture_output=True, text=True)
+
+    # Verificar que subprocess.run fue llamado tres veces con diferentes comandos
+    assert mock_subprocess_run.call_count == 3
 
 
 def test_time_to_seconds():

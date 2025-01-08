@@ -65,40 +65,40 @@ class BackendError(Exception):
 
 class RunCommandError(Exception):
     """Exception raised for errors in running a command."""
-    def __init__(self, cmd, returncode, stderr):
-        hint = ("Ensure the required software is installed and available in"
-                "your PATH.")
-        super().__init__(f"Command '{cmd}' failed with return code "
-                         f"{returncode}:\n{stderr}\nHint: {hint}")
+    def __init__(self, cmd, returncode, stderr, hint=None):
         self.cmd = cmd
         self.returncode = returncode
         self.stderr = stderr
+        self.hint = hint or ("Ensure the required software is installed and"
+                             " available in your PATH.")
+        super().__init__(f"Command '{cmd}' failed with return code"
+                         f" {returncode}:\n{stderr}\nHint: {self.hint}")
 
 
 class CommandNotFoundError(RunCommandError):
     """Raised when a required command is not found."""
     def __init__(self, cmd):
-        hint = (f"Ensure the command '{cmd}' is installed"
-                " and available in your PATH.")
-        super().__init__(cmd, 127, hint)
+        hint = (f"Ensure the command '{cmd}' is installed and available in "
+                "your PATH.")
+        super().__init__(cmd, 127, "", hint)
 
 
 class ReservationError(RunCommandError):
     """Raised when there is an issue with the reservation system."""
     def __init__(self, cmd, stderr):
         hint = (
-            "Check if there is an active reservation using"
+            "Check if there is an active reservation using "
             "`scontrol show reservations`, "
             "or verify that your reservation parameters are correct."
         )
-        super().__init__(cmd, 1, f"{stderr}\nHint: {hint}")
+        super().__init__(cmd, 1, stderr, hint)
 
 
 class GenericSystemError(RunCommandError):
     """Generic system error for unexpected failures."""
     def __init__(self, cmd, returncode, stderr):
         hint = "Review the system configuration and logs for more details."
-        super().__init__(cmd, returncode, f"{stderr}\nHint: {hint}")
+        super().__init__(cmd, returncode, stderr, hint)
 
 
 def run(cmd: str) -> tuple[str, str]:
