@@ -48,6 +48,21 @@ def _setup_logging():
         handlers=[logging.StreamHandler()])
 
 
+class OutputParsingError(Exception):
+    def __init__(self, message, output, hint=None):
+        hint_message = f"\nHint: {hint}" if hint else ""
+        super().__init__(f"{message}\nOutput: {output}{hint_message}")
+        self.output = output
+        self.hint = hint
+
+
+class BackendError(Exception):
+    def __init__(self, message, hint=None):
+        hint_message = f"\nHint: {hint}" if hint else ""
+        super().__init__(f"{message}\n {hint_message}")
+        self.hint = hint
+
+
 class RunCommandError(Exception):
     """Exception raised for errors in running a command."""
     def __init__(self, cmd, returncode, stderr):
