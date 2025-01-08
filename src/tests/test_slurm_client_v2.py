@@ -2,7 +2,7 @@ import pytest
 import os
 from unittest.mock import patch, call
 from qmio.clients import SlurmClient
-from qmio.utils import RunCommandError
+from qmio.utils import BackendError, OutputParsingError
 from config import TUNNEL_TIME_LIMIT
 
 
@@ -11,14 +11,14 @@ class TestSlurmClient:
     def test_scancel(self, mock_run):
         # Instancia del cliente
         client = SlurmClient()
-        client._job_id = 12345
+        client._job_id = "12345"
         # Llamamos al método scancel con un job_id específico
-        client.scancel(12345)
+        client.scancel("12345")
         # Verificamos que se llame a 'run' con el comando correcto
         client.scancel()
         mock_run.assert_has_calls([
             call("scancel 12345"),
-            call("scancel 12345")  # O el valor adecuado según el comportamiento
+            call("scancel 12345")
         ])
 
     @patch("qmio.clients.run")
@@ -36,7 +36,6 @@ class TestSlurmClient:
         client._job_id = 54321
         client._is_job_running(job_id=None)
         mock_run.assert_called_with("scontrol show job 54321")
-
 
     @patch("qmio.clients.run")
     def test_check_backend_node(self, mock_run):
@@ -56,7 +55,7 @@ class TestSlurmClient:
         with pytest.raises(ValueError):
             client._check_backend_node("backend1")
 
-        with pytest.raises(RunCommandError):
+        with pytest.raises(BackendError):
             client._check_backend_node(backend=None)
 
     @patch("qmio.clients.run")
@@ -127,27 +126,6 @@ class TestSlurmClient:
         with pytest.raises(ValueError):
             client.submit_and_wait(backend=None)
 
-
-    # @patch("qmio.clients.run")
-    # @patch("random.randint")
-    # @patch("time.sleep")
-    # @patch.object(SlurmClient, '_is_job_running')
-    # @patch.object(SlurmClient, '_check_backend_node')
-    # def test_submit_and_wait_no_backend(self, mock_check_backend_node, mock_is_job_running, mock_sleep, mock_randint, mock_run):
-    #     # Instancia del cliente
-    #     client = SlurmClient()
-
-    #     # Mock de valores que devuelve cada función
-    #     mock_randint.return_value = 650
-    #     mock_run.return_value = ("Submitted batch job 12345", "")
-    #     mock_is_job_running.side_effect = [False, False, True]  # Simula que el trabajo empieza después de algunos intentos
-    #     mock_check_backend_node.return_value = "10.120.1.10"
-
-    #     # Llamamos al método a probar
-    #     with pytest.raises(ValueError):
-    #         job_id, endpoint = client.submit_and_wait(backend=None)
-
-
     @patch("qmio.clients.run")
     @patch("random.randint")
     @patch("time.sleep")
@@ -164,9 +142,8 @@ class TestSlurmClient:
         mock_check_backend_node.return_value = "NON_IP"
 
         # Llamamos al método a probar
-        with pytest.raises(RunCommandError):
+        with pytest.raises(OutputParsingError):
             job_id, endpoint = client.submit_and_wait(backend="backend1")
-
 
     @patch.object(SlurmClient, '_is_job_running', return_value=False)  # Simular que el job no arranca nunca
     @patch("qmio.clients.run")
@@ -181,7 +158,6 @@ class TestSlurmClient:
         # Verificamos que al alcanzar el timeout se lanza el TimeoutError
         with pytest.raises(TimeoutError, match="Tunnel did not start withing the 8h time frame"):
             client.submit_and_wait(backend="backend1")
-
 
     @patch.object(SlurmClient, '_is_job_running', side_effect=KeyboardInterrupt)  # Simular un KeyboardInterrupt
     @patch.object(SlurmClient, 'scancel')  # Mockear el método scancel
