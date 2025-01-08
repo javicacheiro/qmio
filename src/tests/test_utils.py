@@ -9,8 +9,8 @@ def test_run_success(mock_subprocess_run):
     # Simular la salida exitosa de subprocess.run
     mock_completed_process = MagicMock()
     mock_completed_process.returncode = 0
-    mock_completed_process.stdout = b'Success output'
-    mock_completed_process.stderr = b''
+    mock_completed_process.stdout = 'Success output'
+    mock_completed_process.stderr = ''
     mock_subprocess_run.return_value = mock_completed_process
     # Llamamos a la función run con el comando ficticio
     stdout, stderr = run("fake command")
@@ -18,7 +18,7 @@ def test_run_success(mock_subprocess_run):
     assert stdout == "Success output"
     assert stderr == ""
     # Verificamos que subprocess.run fue llamado correctamente
-    mock_subprocess_run.assert_called_once_with("fake command", shell=True, capture_output=True, check=False)
+    mock_subprocess_run.assert_called_once_with("fake command", shell=True, capture_output=True, text=True)
 
 
 @patch("qmio.utils.subprocess.run")
@@ -26,14 +26,14 @@ def test_run_failure(mock_subprocess_run):
     # Simular que subprocess.run falla con un código de error
     mock_completed_process = MagicMock()
     mock_completed_process.returncode = 1
-    mock_completed_process.stdout = b''
-    mock_completed_process.stderr = b'Error occurred'
+    mock_completed_process.stdout = ''
+    mock_completed_process.stderr = 'Error occurred'
     mock_subprocess_run.return_value = mock_completed_process
     # Verificamos que la excepción RunCommandError se lanza en caso de error
     with pytest.raises(RunCommandError, match="Error occurred"):
         run("fake command")
     # Verificamos que subprocess.run fue llamado correctamente
-    mock_subprocess_run.assert_called_once_with("fake command", shell=True, capture_output=True, check=False)
+    mock_subprocess_run.assert_called_once_with("fake command", shell=True, capture_output=True, text=True)
 
 
 def test_time_to_seconds():
