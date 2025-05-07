@@ -1,9 +1,8 @@
 """
-Centralized helper methods.
+Centralized Accounting methods.
 
-This module provides centralized utility functions and classes
-to support various operations within the application,
-including logging setup and command execution.
+This module provides centralized accounting
+functionalities in a form of an Accounting Unit Class
 """
 import logging
 from datetime import datetime
