@@ -9,6 +9,7 @@ from datetime import datetime
 import socket
 import getpass
 import json
+import uuid
 from typing import Optional, Final
 
 from config import ACCOUNT_PATH
@@ -32,7 +33,9 @@ class AccountUnit:
 
     def set_job_id(self, job_id: Optional[str]):
         self._job_id = job_id
-        self._logger.info("Logged Slurm Job ID info")
+        if self._job_id is None:
+            self._job_id = str(uuid.uuid4())
+        self._logger.info("Logged Job ID info")
 
     def finish(self):
         self._end_time = datetime.now()

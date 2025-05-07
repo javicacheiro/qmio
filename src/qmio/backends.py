@@ -250,6 +250,7 @@ class QPUBackend:
         account_path: Optional[str] = None,
         tunnel_time_limit: Optional[str] = None,
         reservation_name: Optional[str] = None,
+        job_id: Optional[str] = None,
     ):
 
         """
@@ -273,7 +274,7 @@ class QPUBackend:
         self._endpoint = address or ZMQ_SERVER
         self.client: Optional[ZMQClient] = None
         self._slurmclient: Optional[SlurmClient] = None
-        self._job_id: Optional[str] = None
+        self._job_id = job_id
         self._verification_cmd: Optional[str] = None
         if time_within_time_limit(tunnel_time_limit):
             self._tunnel_time_limit = tunnel_time_limit or None
@@ -389,6 +390,7 @@ class QPUBackend:
                 f"Tunnel job stablished in: {(end_tunnel_job - start)/1e9}"
             )
 
+        self._accounting.set_job_id(job_id=self._job_id)
         # Verify the connection
         self._verify_connection()
 
