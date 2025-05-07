@@ -30,6 +30,9 @@ from config import ZMQ_SERVER
 from qmio.clients import SlurmClient, ZMQClient
 from qmio.utils import run, time_within_time_limit
 
+# Testeo de accounting
+from qmio.accounting import AccountUnit
+
 logger = logging.getLogger(__name__)
 
 
@@ -244,6 +247,7 @@ class QPUBackend:
         address: Optional[str] = None,
         logging_level: Union[int, str] = logging.NOTSET,
         logging_filename: Optional[str] = None,
+        account_path: Optional[str] = None,
         tunnel_time_limit: Optional[str] = None,
         reservation_name: Optional[str] = None,
     ):
@@ -264,11 +268,12 @@ class QPUBackend:
         reservation_name : str or None, optional
             reservation name user specified
         """
+        self._accounting = AccountUnit(account_path=account_path)
         self._backend = "qpu"
         self._endpoint = address or ZMQ_SERVER
         self.client: Optional[ZMQClient] = None
         self._slurmclient: Optional[SlurmClient] = None
-        self._job_id = None
+        self._job_id: Optional[str] = None
         self._verification_cmd: Optional[str] = None
         if time_within_time_limit(tunnel_time_limit):
             self._tunnel_time_limit = tunnel_time_limit or None
@@ -373,6 +378,7 @@ class QPUBackend:
                 backend=self._backend,
                 time_limit=self._tunnel_time_limit
             )
+            self._accounting.set_job_id(job_id=self._job_id)
             self._logger.debug(
                 f"Returns of submit and wait: job_id = {self._job_id}& "
                 f"endpoint = {self._endpoint}"
@@ -413,7 +419,7 @@ class QPUBackend:
         self._logger.info("Disconnect method started")
         start = time.time_ns()
         # Check if job is running before trying to cancel it
-        if self._job_id:
+        if self._job_id and self._slurmclient is not None:
             while self._slurmclient._is_job_running(self._job_id):
                 try:
                     self._slurmclient.scancel(self._job_id)
@@ -438,6 +444,8 @@ class QPUBackend:
 
             self.client = None
         end = time.time_ns()
+        self._accounting.finish()
+        self._accounting.publish_to_log_file()
         self._logger.info(f"Disconnection happened in: {(end - start)/1e9}")
 
     def _state_flush(self) -> None:
@@ -531,6 +539,7 @@ class QPUBackend:
         # reopen the connection. The Tunnel job ended unexpectedly
         if (
             self._job_id
+            and self._slurmclient is not None
             and not self._slurmclient._is_job_running(self._job_id)
         ):
             self._state_flush()
@@ -549,6 +558,9 @@ class QPUBackend:
         # Send the job to the server
         self.client._send(job)
 
+        self._accounting.total_circuit_bytes += len(circuit.encode())
+        self._accounting.total_shots += shots
+        self._accounting.calls += 1
         # Wait for results from the server
         result = self.client._await_results()
 

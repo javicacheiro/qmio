@@ -233,7 +233,7 @@ class SlurmClient():
             time_limit: Optional[str] = None,
             reservation_name: Optional[str] = None,
     ):
-        self._job_id = None
+        self._job_id: Optional[str] = None
         self._endpoint_port = None
         self._submit_cmd = None
         self._scancel_cmd = None
