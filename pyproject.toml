@@ -43,6 +43,11 @@ include = [
 [tool.hatch.build.targets.wheel]
 sources = ["src"]
 
+[tool.hatch.envs.dev.env-vars]
+ZMQ_SERVER = "tcp://10.133.29.226:5556"
+QMIO_ENV = "dev"
+LOG_LEVEL = "DEBUG"
+
 [tool.hatch.envs.hatch-test]
 default-args = ["src/tests"]
 dependencies = [
